@@ -1,31 +1,60 @@
-const Joi = require("joi");
+const config = require("config");
+const morgan = require("morgan");
+const helmet = require("helmet");
 const express = require("express");
 const app = express();
+const logger = require("./logger");
+
+// Configuration
+console.log("App name:" + config.get("name"));
+console.log("Mail name:" + config.get("mail.host"));
 
 // JSON parser
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static("public"));
+app.use(helmet());
 
-const PORT = process.env.PORT || 3000;
+if (app.get("env") === "development") {
+  app.use(morgan("tiny"));
+  console.log("Development");
+}
+
+app.use(logger);
+
+const PORT = process.env.PORT || 3001;
+
 // Mock data
 const products = require("./mock.js");
 
-// Utils
-const validateProduct = require("./Utils/validate");
+// Validate function
+const validateProduct = require("./utils/validate");
+
+// Template engine
+app.set("view engine", "pug");
+app.set("index", "./views");
 
 // Routers
 app.get("/", (req, res) => {
-  res.json({ id: 1, name: "Tanlee" });
+  res.render("index", { message: "Hello may cung !" });
 });
 
 // Get all products
 app.get("/api/products", (req, res) => {
+  const name = req.body.name;
+  if (name) {
+    const found = products.find(product => product.name === name);
+    if (found) {
+      return res.json(found);
+    } else return res.status(404).send("No matching products found");
+  }
   res.json(products);
 });
 
-//Get a single product
+// Get a single product
 app.get("/api/product/:id", (req, res) => {
   const id = req.params.id;
-  const result = products.find((product) => product.id === parseInt(id));
+  const result = products.find(product => product.id === parseInt(id));
   if (result) res.json(result);
   else return res.status(404).send("No matching products found");
 });
@@ -38,7 +67,7 @@ app.post("/api/products", (req, res) => {
 
   const product = {
     id: products.length + 1,
-    name: req.body.name,
+    name: req.body.name
   };
   products.push(product);
   res.json(products);
@@ -47,7 +76,7 @@ app.post("/api/products", (req, res) => {
 // Edit a product
 app.put("/api/product/:id", (req, res) => {
   const id = req.params.id;
-  const found = products.find((product) => product.id === parseInt(id));
+  const found = products.find(product => product.id === parseInt(id));
 
   if (!found) return res.status(404).send("No matching products found");
 
@@ -62,7 +91,7 @@ app.put("/api/product/:id", (req, res) => {
 // Delete a product
 app.delete("/api/product/:id", (req, res) => {
   const id = req.params.id;
-  const found = products.find((product) => product.id === parseInt(id));
+  const found = products.find(product => product.id === parseInt(id));
 
   if (!found) return res.status(404).send("No matching products found");
 
