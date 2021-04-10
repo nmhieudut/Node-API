@@ -6,6 +6,8 @@ const app = express();
 const logger = require("./middleware/logger");
 const products = require("./routes/products");
 const home = require("./routes/home");
+require("./database");
+require("dotenv").config();
 
 // Configuration
 console.log("App name:" + config.get("name"));
@@ -16,6 +18,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(helmet());
+// Logger middleware
+app.use(logger);
+
 app.use("/", home);
 app.use("/api/products", products);
 
@@ -23,14 +28,7 @@ if (app.get("env") === "development") {
   app.use(morgan("tiny"));
   console.log("Development");
 }
-
-app.use(logger);
-
 const PORT = process.env.PORT || 3000;
-
-// Template engine
-app.set("view engine", "pug");
-app.set("index", "./views");
 
 // Main app
 app.listen(PORT, () => {
