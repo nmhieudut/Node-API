@@ -2,12 +2,14 @@ const config = require("config");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const express = require("express");
-const app = express();
 const logger = require("./middleware/logger");
-const products = require("./routes/products");
-const home = require("./routes/home");
+const cors = require("./middleware/cors");
+const app = express();
 require("./database");
 require("dotenv").config();
+
+const products = require("./routes/products");
+const home = require("./routes/home");
 
 // Configuration
 console.log("App name:" + config.get("name"));
@@ -18,9 +20,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(helmet());
+
 // Logger middleware
 app.use(logger);
+app.use(cors);
 
+// Router
 app.use("/", home);
 app.use("/api/products", products);
 

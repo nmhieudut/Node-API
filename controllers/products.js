@@ -3,7 +3,7 @@ const Product = require("../model/products");
 const validateProduct = require("../utils/validate");
 
 const getEntire = async (req, res) => {
-  const page = parseInt(req.query.page || 0);
+  const page = parseInt(req.query.page - 1 || 0);
   const perPage = parseInt(req.query.count || 12);
   var total;
   const products = await Product.find()
@@ -13,7 +13,7 @@ const getEntire = async (req, res) => {
   if (products.length > 0) {
     return res.status(200).json({ products, total });
   } else {
-    return res.status(404).json({ message: "No matching products" });
+    return res.status(200).json({ message: "No matching products" });
   }
 };
 
@@ -21,7 +21,7 @@ const getById = async (req, res) => {
   const id = req.params.id;
   const result = await Product.find({ _id: id });
   if (result) res.json(result);
-  else return res.status(404).send("No matching products found");
+  else return res.status(200).send("No matching products found");
 };
 
 const createOne = async (req, res) => {
@@ -55,7 +55,7 @@ const updateOne = async (req, res) => {
 
   const existed = await Product.find({ _id: req.params.id });
   if (existed.length === 0) {
-    return res.status(400).json({ message: "This product is not existed " });
+    return res.status(200).json({ message: "This product is not existed " });
   }
 
   const result = await Product.updateOne(
