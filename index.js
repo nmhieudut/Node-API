@@ -9,6 +9,7 @@ require("./database");
 require("dotenv").config();
 
 const products = require("./routes/products");
+const vouchers = require("./routes/vouchers");
 const home = require("./routes/home");
 
 // Configuration
@@ -28,6 +29,7 @@ app.use(cors);
 // Router
 app.use("/", home);
 app.use("/api/products", products);
+app.use("/api/vouchers", vouchers);
 
 if (app.get("env") === "development") {
   app.use(morgan("tiny"));

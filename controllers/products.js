@@ -5,11 +5,10 @@ const validateProduct = require("../utils/validate");
 const getEntire = async (req, res) => {
   const page = parseInt(req.query.page - 1 || 0);
   const perPage = parseInt(req.query.count || 12);
-  var total;
   const products = await Product.find()
     .limit(perPage)
     .skip(perPage * page);
-  total = await Product.find().countDocuments();
+  const total = await Product.find().countDocuments();
   if (products.length > 0) {
     return res.status(200).json({ products, total });
   } else {
