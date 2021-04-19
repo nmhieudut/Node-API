@@ -5,14 +5,20 @@ const validateProduct = require("../utils/validate");
 const getEntire = async (req, res) => {
   const page = parseInt(req.query.page - 1 || 0);
   const perPage = parseInt(req.query.count || 12);
-  const products = await Product.find()
+  const q = req.query.q || "";
+  const products = await Product.find({ name: { $regex: q } })
     .limit(perPage)
     .skip(perPage * page);
-  const total = await Product.find().countDocuments();
+  const total = await Product.find({ name: { $regex: q } }).countDocuments();
   if (products.length > 0) {
-    return res.status(200).json({ products, total });
+    if (q !== "") {
+      return res.status(200).json({ products, total, hasSearched: true });
+    }
+    return res.status(200).json({ products, total, hasSearched: false });
   } else {
-    return res.status(200).json({ message: "No matching products" });
+    return res
+      .status(200)
+      .json({ message: "No matching products", hasSearched: true });
   }
 };
 
