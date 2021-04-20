@@ -10,15 +10,14 @@ const getEntire = async (req, res) => {
     .limit(perPage)
     .skip(perPage * page);
   const total = await Product.find({ name: { $regex: q } }).countDocuments();
+  const resp = { products, total };
   if (products.length > 0) {
     if (q !== "") {
-      return res.status(200).json({ products, total, hasSearched: true });
+      return res.status(200).json({ ...resp, hasSearched: true });
     }
-    return res.status(200).json({ products, total, hasSearched: false });
+    return res.status(200).json({ ...resp, hasSearched: false });
   } else {
-    return res
-      .status(200)
-      .json({ message: "No matching products", hasSearched: true });
+    return res.status(200).json({ ...resp, hasSearched: true });
   }
 };
 
