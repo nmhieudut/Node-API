@@ -6,19 +6,19 @@ const getEntire = async (req, res) => {
   const page = parseInt(req.query.page - 1 || 0);
   const perPage = parseInt(req.query.count || 12);
   const q = req.query.q || "";
-  const products = await Product.find({ name: { $regex: q } })
+  const regex = new RegExp(["^", q, "$"].join(""), "i");
+  const products = await Product.find({ name: regex })
     .limit(perPage)
     .skip(perPage * page);
-  const total = await Product.find({ name: { $regex: q } }).countDocuments();
+  const total = products.length;
   const resp = { products, total };
   if (products.length > 0) {
     if (q !== "") {
       return res.status(200).json({ ...resp, hasSearched: true });
     }
     return res.status(200).json({ ...resp, hasSearched: false });
-  } else {
-    return res.status(200).json({ ...resp, hasSearched: true });
   }
+  return res.status(200).json({ ...resp, hasSearched: true });
 };
 
 const getById = async (req, res) => {
